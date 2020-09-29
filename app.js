@@ -1,6 +1,11 @@
 const express = require("express");
-const { graphqlHTTP } = require("express-graphql");
-const { buildSchema } = require("graphql");
+const {
+  graphqlHTTP
+} = require("express-graphql");
+const {
+  buildSchema
+} = require("graphql");
+const mongoose = require("mongoose")
 
 const app = express();
 
@@ -57,6 +62,9 @@ app.use(
     graphiql: true,
   })
 );
+
+mongoose.connect('')
+
 
 app.listen(3000);
 
