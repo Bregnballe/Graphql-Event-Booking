@@ -5,11 +5,10 @@ const {
 const {
   buildSchema
 } = require("graphql");
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
+const Event = require("./models/event");
 
 const app = express();
-
-const events = [];
 
 app.use(
   "/graphql",
@@ -27,7 +26,6 @@ app.use(
         title: String!
         description: String!
         price: Float!
-        date: String!
       }
 
       type RootQuery {
@@ -44,29 +42,43 @@ app.use(
       }
   `),
     rootValue: {
-      events: () => {
-        return events;
+      events: async () => {
+        try {
+          return await Event.find().lean();
+        } catch (err) {
+          console.log(err);
+          throw err;
+        }
       },
-      createEvent: (args) => {
-        const event = {
-          _id: Math.random().toString(),
+      createEvent: async (args) => {
+        const event = new Event({
           title: args.eventInput.title,
           description: args.eventInput.description,
           price: +args.eventInput.price,
-          date: args.eventInput.date,
-        };
-        events.push(event);
-        return event;
+        });
+        try {
+          const newEvent = await event.save();
+          return newEvent;
+        } catch (err) {
+          console.log(err);
+          throw err;
+        }
       },
     },
     graphiql: true,
   })
 );
 
-mongoose.connect('')
-
-
-app.listen(3000);
+mongoose
+  .connect(
+    `mongodb+srv://${process.env.MONGO_ATLAS_USER}:${process.env.MONGO_ATLAS_PW}@cluster0.ze1o1.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
+  )
+  .then(() => {
+    app.listen(3000);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
 
 /* mutation {
   createEvent(eventInput: {title: "A Test", description: "test description", price: 9.99, date: "2020-09-28T17:49:53Z"}) {
@@ -81,4 +93,7 @@ query {
     date
   }
 }
+
+,
+          date: new Date(args.eventInput.date),
 */

@@ -1,6 +1,7 @@
 {
     "env": {
-        "MONGO_USER": "bregnballe",
-        "MONGO_PASSWORD": "gDu1ewPUpJjzB0IF"
+        "MONGO_ATLAS_USER": "bregnballe",
+        "MONGO_ATLAS_PW": "gDu1ewPUpJjzB0IF",
+        "MONGO_DB": "GraphQL-Event-Booking"
     }
 }
