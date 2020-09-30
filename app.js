@@ -6,7 +6,10 @@ const {
   buildSchema
 } = require("graphql");
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+
 const Event = require("./models/event");
+const User = require("./models/user");
 
 const app = express();
 
@@ -20,6 +23,14 @@ app.use(
         description: String!
         price: Float!
         date: String!
+        creator: User!
+      }
+
+      type User {
+        _id: ID!
+        email: String!
+        password: String
+        createdEvents: [Event!]
       }
 
       input EventInput {
@@ -28,12 +39,19 @@ app.use(
         price: Float!
       }
 
+      input UserInput {
+        email: String!
+        password: String!
+      }
+
       type RootQuery {
         events: [Event!]!
+        users: [User!]!
       }
 
       type RootMutation {
         createEvent(eventInput: EventInput): Event
+        createUser(userInput: UserInput): User
       }
 
       schema {
@@ -44,9 +62,8 @@ app.use(
     rootValue: {
       events: async () => {
         try {
-          return await Event.find().lean();
+          return await Event.find().lean().populate('creator'); // lean() returns only plain objects, not mongoose documents. populate() adds the data from the user model to the creator field
         } catch (err) {
-          console.log(err);
           throw err;
         }
       },
@@ -55,10 +72,36 @@ app.use(
           title: args.eventInput.title,
           description: args.eventInput.description,
           price: +args.eventInput.price,
+          creator: "5f74820a9f9b987b68c00073",
         });
         try {
+          const user = await User.findById("5f74820a9f9b987b68c00073");
           const newEvent = await event.save();
+          await user.createdEvents.push(newEvent);
+          await user.save();
           return newEvent;
+        } catch (err) {
+          throw err;
+        }
+      },
+      users: async () => {
+        try {
+          return await User.find().lean().populate('createdEvents');
+        } catch (err) {
+          throw err;
+        }
+      },
+      createUser: async (args) => {
+        const user = new User({
+          email: args.userInput.email,
+          password: bcrypt.hashSync(args.userInput.password, 12),
+        });
+        try {
+          const newUser = await user.save();
+          return {
+            ...newUser._doc,
+            password: null
+          }; //spreadout properties in object, replace password
         } catch (err) {
           console.log(err);
           throw err;
@@ -81,9 +124,19 @@ mongoose
   });
 
 /* mutation {
-  createEvent(eventInput: {title: "A Test", description: "test description", price: 9.99, date: "2020-09-28T17:49:53Z"}) {
-    title
-  	description
+  createEvent(eventInput: {title: "A Test", description: "test description", price: 9.99 }) {
+    _id
+  	date
+  }
+}
+
+mutation {
+  createUser(userInput: {email: "hithere@gmail.com", password: "test"}) {
+    email
+    password
+    createdEvents {
+      title
+    }
   }
 }
 
@@ -94,6 +147,11 @@ query {
   }
 }
 
-,
-          date: new Date(args.eventInput.date),
+query {
+   users {
+    createdEvents {
+      _id
+    }
+  }
+}
 */
