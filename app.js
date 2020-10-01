@@ -62,7 +62,7 @@ app.use(
     rootValue: {
       events: async () => {
         try {
-          return await Event.find().lean().populate('creator'); // lean() returns only plain objects, not mongoose documents. populate() adds the data from the user model to the creator field
+          return await Event.find(); // Old comment: lean() returns only plain objects, not mongoose documents. populate() adds the data from the user model to the creator field
         } catch (err) {
           throw err;
         }
@@ -86,7 +86,7 @@ app.use(
       },
       users: async () => {
         try {
-          return await User.find().lean().populate('createdEvents');
+          return await User.find();
         } catch (err) {
           throw err;
         }
