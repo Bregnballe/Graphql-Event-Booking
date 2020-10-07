@@ -1,6 +1,4 @@
-const {
-  buildSchema
-} = require("graphql");
+const { buildSchema } = require("graphql");
 
 /* A GraphQL Schema is a special type of object that represents the object you can fetch and what fields it has. It shows how the data is structured. This makes sure we cannot add data to or query data from fields that don't exist as well as add data of the wrong type. */
 
@@ -28,6 +26,12 @@ const grapqlSchema = buildSchema(`
         createdEvents: [Event!]
       }
 
+      type AuthData {
+        userId: ID!
+        token: String!
+        tokenExpiration: Int!
+      }
+
       input EventInput {
         title: String!
         description: String!
@@ -43,6 +47,7 @@ const grapqlSchema = buildSchema(`
         events: [Event!]!
         bookings: [Booking!]!
         users: [User!]!
+        login(email: String!, password: String!): AuthData!
       }
 
       type RootMutation {
