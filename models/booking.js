@@ -12,7 +12,7 @@ const bookingSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User', // These are ObjectIds from the user model
-        autopopulate: true // will populate the creator with user data if a query is made requesting it
+        autopopulate: true // will populate the user with user data if a query is made requesting it
     },
     created: {
         type: Date,

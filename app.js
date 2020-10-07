@@ -6,7 +6,17 @@ const {
 const mongoose = require("mongoose");
 
 const graphqlSchema = require("./graphql/schemas/index")
-const graphqlResolvers = require("./graphql/resolvers/index")
+
+const bookingResolvers = require("./graphql/resolvers/bookings")
+const eventResolvers = require("./graphql/resolvers/events")
+const userResolvers = require("./graphql/resolvers/users")
+
+const graphqlResolvers = {
+  ...bookingResolvers,
+  ...eventResolvers,
+  ...userResolvers
+};
+
 
 const app = express();
 
@@ -19,46 +29,11 @@ app.use(
   })
 );
 
-mongoose
-  .connect(
-    `mongodb+srv://${process.env.MONGO_ATLAS_USER}:${process.env.MONGO_ATLAS_PW}@cluster0.ze1o1.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
-  )
-  .then(() => {
+(async () => {
+  try {
+    await mongoose.connect(`mongodb+srv://${process.env.MONGO_ATLAS_USER}:${process.env.MONGO_ATLAS_PW}@cluster0.ze1o1.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`)
     app.listen(3000);
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-
-/* mutation {
-  createEvent(eventInput: {title: "A Test", description: "test description", price: 9.99 }) {
-    _id
-  	date
+  } catch (err) {
+    console.log('error: ' + err)
   }
-}
-
-mutation {
-  createUser(userInput: {email: "hithere@gmail.com", password: "test"}) {
-    email
-    password
-    createdEvents {
-      title
-    }
-  }
-}
-
-query {
-  events {
-    _id
-    date
-  }
-}
-
-query {
-   users {
-    createdEvents {
-      _id
-    }
-  }
-}
-*/
+})()
