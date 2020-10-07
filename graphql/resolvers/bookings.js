@@ -44,7 +44,7 @@ const bookingResolvers = {
       const foundBookings = await Booking.find().lean({
         autopopulate: true,
       });
-      return JSON.parse(JSON.stringify(foundBookings));
+      return foundBookings; //JSON.parse(JSON.stringify(foundBookings));
     } catch (err) {
       throw err;
     }
